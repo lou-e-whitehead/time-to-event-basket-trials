@@ -1,5 +1,5 @@
 # time-to-event-basket-trials
-Bayesian borrowing in basket trials with time to event outcomes
+Bayesian borrowing in basket trials with time-to-event outcomes
 
 JAGS code together with R functions to implement methods detailed in 'Bayesian borrowing for basket trials with time-to-event outcomes' (preprint available soon).
 
