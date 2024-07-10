@@ -1,0 +1,24 @@
+model{
+
+for (i in 1:n) 
+
+	{
+	 is.censored[i]~dinterval(t[i],t.cen[i]) ## t[i] is censored if t[i] is greater than t.cen[i]
+	 t[i]~dweib(rho,lambda[i]) # only include in the Weibull model the times that were actually observed 
+	 lambda[i]<-exp(beta0+beta1*Trt[i]) # reparamaterize for regression
+	}
+
+beta0 ~ dnorm(prior.beta0[1], prec.beta0)
+prec.beta0 <- pow(prior.beta0[2], -2)
+
+beta1 ~ dnorm(prior.beta1[1], prec.beta1)
+prec.beta1 <- pow(prior.beta1[2], -2) 
+
+theta <- exp(beta1)
+
+# Posterior probability, pCat = P(theta<cutoff.theta)
+pCat <- step(cutoff.theta - theta) 
+
+rho~dgamma(a, b) 
+
+}

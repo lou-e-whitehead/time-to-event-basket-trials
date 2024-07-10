@@ -1,0 +1,52 @@
+model{
+
+for (i in 1:totaln) {
+
+	 is.censored[i]~dinterval(t[i],t.cen[i])
+	 t[i]~dweib(rho[Module[i]],lambda[i])
+	 lambda[i]<-exp(beta0[Module[i]]+(beta_1[Module[i]])*Trt[i])
+	}
+
+for (j in 1:k){
+
+#########################################
+# pick mix.beta[1, j] or mix.beta[2, j] #
+#########################################
+beta_1[j] <- mix.beta1[exch.ind[j], j] 
+
+################################
+# model for exchangeable beta1 #
+################################
+mix.beta1[1, j] <- B1 + b1[j]
+b1[j] ~ dnorm(0.0, tau1)
+
+####################################
+# model for non-exchangeable beta1 #
+####################################
+mix.beta1[2, j] <- beta1[j]
+beta1[j]~dnorm(nex.beta1[j], nex.prec.beta1[j])		  
+beta0[j]~dnorm(nex.beta0[j], nex.prec.beta0[j])	  
+   exch.ind[j] ~ dcat(pMix[1:2]) # The argument of the dcat distribution is a vector of probabilities for each category.
+		for(l in 1:2){
+			each[j, l] <- equals(exch.ind[j], l)		
+			}
+
+theta[j] <- exp(beta_1[j])
+
+# Posterior probability, pCat = P(theta<cutoff.theta)
+pCat[j] <- step(cutoff.theta - theta[j])
+
+rho[j]~dgamma(a[j],b[j]) 
+
+nex.prec.beta0[j] <- pow(nex.sig.beta0[j], -2)
+nex.prec.beta1[j] <- pow(nex.sig.beta1[j], -2)
+}
+
+B1 ~ dnorm(prior.B1[1], prec.B1) 
+prec.B1 <- pow(prior.B1[2], -2) 
+
+tau1 <- pow(sigma1, -2)
+sigma1 ~ dnorm(0, prec.sig1)I(0.001,)
+prec.sig1 <- pow(prior.sig.HN1, -2) 
+
+}

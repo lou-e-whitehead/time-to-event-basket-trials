@@ -1,0 +1,41 @@
+model{
+
+for (i in 1:totaln) { 
+
+	 is.censored[i]~dinterval(t[i],t.cen[i]) 
+	 t[i]~dweib(rho[Module[i]],lambda[i])  
+	 lambda[i]<-exp(B0+b0[Module[i]]+(B1+b1[Module[i]])*Trt[i])
+
+	}
+
+for (j in 1:k){
+
+	b0[j] ~ dnorm(0.0, tau0)
+	b1[j] ~ dnorm(0.0, tau1) 
+ 
+	theta[j] <- exp(B1 + b1[j])
+
+	rho[j]~dgamma(a, b)
+
+	# Posterior probability, pCat = P(theta<cutoff.theta)
+	pCat[j] <- step(cutoff.theta - theta[j])
+
+	}
+
+# Fixed effects priors
+B0 ~ dnorm(prior.B0[1], prec.B0)
+prec.B0 <- pow(prior.B0[2], -2)
+
+B1 ~ dnorm(prior.B1[1], prec.B1)
+prec.B1 <- pow(prior.B1[2], -2) 
+
+# Random effects priors
+tau0 <- pow(sigma0, -2)
+sigma0 ~ dnorm(0, prec.sig0)I(0.001,)
+prec.sig0 <- pow(prior.sig.HN0, -2) 
+
+tau1 <- pow(sigma1, -2)
+sigma1 ~ dnorm(0, prec.sig1)I(0.001,)
+prec.sig1 <- pow(prior.sig.HN1, -2) 
+
+}
